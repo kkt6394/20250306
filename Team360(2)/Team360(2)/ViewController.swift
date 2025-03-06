@@ -47,6 +47,13 @@ class ViewController: UIViewController {
         firstTableView.isScrollEnabled = false // 스크롤 제거
         firstTableView.separatorStyle = .none // 구분선 제거
 
+        secondTableView.delegate = self
+        secondTableView.dataSource = self
+        secondTableView.backgroundColor = UIColor(hex: "#ffefd6") // 하단 테이블뷰 배경색
+        secondTableView.layer.cornerRadius = 20 // 모서리 둥글게 처리
+        secondTableView.isScrollEnabled = false // 스크롤 제거
+        secondTableView.separatorStyle = .none // 구분선 제거
+
         firstTableView.delegate = self
         firstTableView.dataSource = self
         
@@ -59,7 +66,11 @@ class ViewController: UIViewController {
 
         // 테이블뷰 위 아래 공백 조절
         firstTableView.contentInset = UIEdgeInsets(top: 40, left: 0, bottom: 30, right: 0)
-    }
+        secondTableView.frame.origin.y = firstTableView.frame.maxY + 20 // 하단 테이블뷰를 상단 테이블뷰 바로 밑으로 이동하는 코드
+        secondTableView.frame.size.height = 250 // 하단 테이블뷰 세로 사이즈 조절
+        secondTableView.contentInset = UIEdgeInsets(top: 35, left: 0, bottom: 20, right: 0)
+
+        }
 }
 
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
@@ -81,11 +92,11 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 
             // Title과 Subtitle 스타일 변경
             cell.textLabel?.text = teamCharacteristic[indexPath.row].0
-            cell.textLabel?.font = UIFont.boldSystemFont(ofSize: 15)
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 15, weight: .heavy) // 폰트 더 두껍게
             cell.textLabel?.textColor = UIColor(hex: "#666666")
 
             cell.detailTextLabel?.text = teamCharacteristic[indexPath.row].1
-            cell.detailTextLabel?.font = UIFont.systemFont(ofSize: 13)
+            cell.detailTextLabel?.font = UIFont.boldSystemFont(ofSize: 12) // 폰트 두껍게
             cell.detailTextLabel?.textColor = UIColor(hex: "#666666")
 
             // 선택 효과 제거
@@ -96,6 +107,10 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             return cell
         } else if tableView == secondTableView {
             let cell = tableView.dequeueReusableCell(withIdentifier: "SecondCell", for: indexPath)
+
+            cell.backgroundColor = UIColor(hex: "#ffefd6") // 하단 테이블뷰 셀 내부 배경 색상
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 15, weight: .bold)
+            cell.textLabel?.textColor = UIColor(hex: "#666666") // 하단 테이블뷰 셀 내부 텍스트 색상
 
             // 이름과 이모지 설정
             let fullName = "\(teammate[indexPath.row])"
@@ -120,13 +135,20 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                     mbtiLabel.backgroundColor = .gray
                 }
 
+                mbtiLabel.textColor = UIColor(hex: "#666666") // 원하는 Hex 코드로 변경
+                mbtiLabel.frame.origin.x -= 20 // MBTI 위치를 왼쪽으로 이동
+
                 mbtiLabel.layer.cornerRadius = 10 // 원하는 크기로 조정
                 mbtiLabel.layer.masksToBounds = true
                 
                 mbtiLabel.frame.size = CGSize(width: 60, height: 20)
                 mbtiLabel.textAlignment = .center
-                
-                
+
+                if cell.accessoryView == nil { // 테이블뷰 내부에 ">" 아이콘 추가
+                    let icon = UIImageView(image: UIImage(systemName: "chevron.right"))
+                    icon.tintColor = UIColor(hex: "#666666")
+                    cell.accessoryView = icon
+                }
             }
 
             return cell
