@@ -69,6 +69,21 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if tableView == firstTableView {
             let cell = tableView.dequeueReusableCell(withIdentifier: "FirstCell", for: indexPath)
+
+            cell.backgroundColor = UIColor(hex: "#ffefd6") // 셀 내부 색상
+
+            // Title과 Subtitle 스타일 변경
+            cell.textLabel?.text = teamCharacteristic[indexPath.row].0
+            cell.textLabel?.font = UIFont.boldSystemFont(ofSize: 15)
+            cell.textLabel?.textColor = UIColor(hex: "#666666")
+
+            cell.detailTextLabel?.text = teamCharacteristic[indexPath.row].1
+            cell.detailTextLabel?.font = UIFont.systemFont(ofSize: 13)
+            cell.detailTextLabel?.textColor = UIColor(hex: "#666666")
+
+            // 선택 효과 제거
+            cell.selectionStyle = .none
+
             cell.textLabel?.text = teamCharacteristic[indexPath.row].0
             cell.detailTextLabel?.text = teamCharacteristic[indexPath.row].1
             return cell
