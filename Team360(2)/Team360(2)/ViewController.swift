@@ -39,7 +39,14 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        firstTableView.delegate = self
+        firstTableView.dataSource = self
+        firstTableView.backgroundColor = UIColor(hex: "#ffefd6") // 테이블뷰 배경색
+        firstTableView.layer.cornerRadius = 20 // 모서리 둥글게 처리
+        firstTableView.isScrollEnabled = false // 스크롤 제거
+        firstTableView.separatorStyle = .none // 구분선 제거
+
         firstTableView.delegate = self
         firstTableView.dataSource = self
         
