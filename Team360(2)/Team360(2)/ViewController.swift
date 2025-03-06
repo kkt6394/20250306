@@ -53,6 +53,13 @@ class ViewController: UIViewController {
         secondTableView.delegate = self
         secondTableView.dataSource = self
     }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        // 테이블뷰 위 아래 공백 조절
+        firstTableView.contentInset = UIEdgeInsets(top: 40, left: 0, bottom: 30, right: 0)
+    }
 }
 
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
