@@ -12,7 +12,6 @@ class ViewController: UIViewController {
     let teammate: [String] = ["🙋🏻‍♀️박혜민", "🙆🏻‍♂️김기태", "🙋🏻‍♂️김형윤", "💁🏻‍♂️변준영"]
     let MBTI: [String] = ["ESTJ", "INFP", "ISTP", "INTJ"]
 
-    // 각 팀원의 강점, 스타일, 주소 정보, 이미지
     let strength: [String: String] = [
         "🙋🏻‍♀️박혜민": "솔직한 커뮤니케이션",
         "🙆🏻‍♂️김기태": "최신 기술 트렌드에 대한 관심과 빠른 학습 능력",
@@ -45,6 +44,8 @@ class ViewController: UIViewController {
         
         secondTableView.delegate = self
         secondTableView.dataSource = self
+
+        secondTableView.register(SecondTableViewCell.self, forCellReuseIdentifier: "SecondCell")
     }
 }
 
@@ -66,50 +67,32 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             cell.detailTextLabel?.text = teamCharacteristic[indexPath.row].1
             return cell
         } else if tableView == secondTableView {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "SecondCell", for: indexPath)
-
-            // 이름과 이모지 설정
-            let fullName = "\(teammate[indexPath.row])"
-            cell.textLabel?.text = fullName
-
-            // MBTI 레이블 추가
-            if let mbtiLabel = cell.viewWithTag(100) as? UILabel {
-                let mbti = MBTI[indexPath.row]
-                mbtiLabel.text = mbti
-
-                // MBTI에 따라 색상 설정
-                switch mbti {
-                case "ESTJ":
-                    mbtiLabel.backgroundColor = UIColor(hex: "#FCE6E6")
-                case "INFP":
-                    mbtiLabel.backgroundColor = UIColor(hex: "#EBFCE6")
-                case "ISTP":
-                    mbtiLabel.backgroundColor = UIColor(hex: "#E6F4FC")
-                case "INTJ":
-                    mbtiLabel.backgroundColor = UIColor(hex: "#D6D8FD")
-                default:
-                    mbtiLabel.backgroundColor = .gray
-                }
-
-                mbtiLabel.layer.cornerRadius = 10 // 원하는 크기로 조정
-                mbtiLabel.layer.masksToBounds = true
-                
-                mbtiLabel.frame.size = CGSize(width: 60, height: 20)
-                mbtiLabel.textAlignment = .center
-                
-                
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "SecondCell", for: indexPath) as? SecondTableViewCell else {
+                fatalError("SecondCell을 SecondTableViewCell로 캐스팅할 수 없습니다.")
             }
+
+            let fullName = "\(teammate[indexPath.row])"
+            cell.nameLabel.text = fullName
+            let mbti = MBTI[indexPath.row]
+            cell.mbtiLabel.text = mbti
+            cell.mbtiLabel.backgroundColor = UIColor(hex: {
+                switch mbti {
+                case "ESTJ": return "#FCE6E6"
+                case "INFP": return "#EBFCE6"
+                case "ISTP": return "#E6F4FC"
+                case "INTJ": return "#D6D8FD"
+                default: return "#CCCCCC"
+                }
+            }())
 
             return cell
         }
-        
         return UITableViewCell()
     }
 
-    // 셀 선택 시 데이터 전달 및 segue 실행
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         if identifier == "ShowTeammateDetail" {
-            return false // 🚀 자동 실행 방지
+            return false
         }
         return true
     }
@@ -118,11 +101,10 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         if tableView == secondTableView {
             let selectedTeammate = teammate[indexPath.row]
 
-            // 팀원의 정보 가져오기
             if let strengthValue = strength[selectedTeammate],
-                       let styleValue = style[selectedTeammate],
-                       let adressValue = adress[selectedTeammate],
-                       let imageName = teammateImages[selectedTeammate] {
+               let styleValue = style[selectedTeammate],
+               let adressValue = adress[selectedTeammate],
+               let imageName = teammateImages[selectedTeammate] {
 
                 let dataToSend: [String: Any] = [
                     "name": selectedTeammate,
@@ -132,7 +114,6 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                     "imageName": imageName
                 ]
 
-                // 데이터 전달 후 segue 실행
                 performSegue(withIdentifier: "ShowTeammateDetail", sender: dataToSend)
             }
 
@@ -140,46 +121,74 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
-    // segue에서 데이터 받기
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "ShowTeammateDetail" {
-            if let teammateDetailVC = segue.destination as? TeammateDetailViewController {
-                if let data = sender as? [String: Any] {
-                    teammateDetailVC.teammateName = data["name"] as? String ?? "이름 없음"
-                    teammateDetailVC.teammateStrength = data["strength"] as? String ?? "강점 없음"
-                    teammateDetailVC.teammateStyle = data["style"] as? String ?? "스타일 없음"
-                    teammateDetailVC.teammateAdress = data["adress"] as? String ?? "주소 없음"
-                    teammateDetailVC.teammateImageName = data["imageName"] as? String ?? ""
-                }
+        if segue.identifier == "ShowTeammateDetail",
+           let teammateDetailVC = segue.destination as? TeammateDetailViewController,
+           let data = sender as? [String: Any] {
+            teammateDetailVC.teammateName = data["name"] as? String ?? "이름 없음"
+            teammateDetailVC.teammateStrength = data["strength"] as? String ?? "강점 없음"
+            teammateDetailVC.teammateStyle = data["style"] as? String ?? "스타일 없음"
+            teammateDetailVC.teammateAdress = data["adress"] as? String ?? "주소 없음"
+            teammateDetailVC.teammateImageName = data["imageName"] as? String ?? ""
+        }
+    }
+}
+
+class SecondTableViewCell: UITableViewCell {
+    let nameLabel = UILabel()
+    let mbtiLabel = UILabel()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        mbtiLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        mbtiLabel.textAlignment = .center
+        mbtiLabel.layer.cornerRadius = 10
+        mbtiLabel.layer.masksToBounds = true
+        mbtiLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        mbtiLabel.backgroundColor = .lightGray
+        mbtiLabel.textColor = .black
+        mbtiLabel.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+
+        contentView.addSubview(nameLabel)
+        contentView.addSubview(mbtiLabel)
+        
+        NSLayoutConstraint.activate([
+            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 15),
+            nameLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            
+            mbtiLabel.leadingAnchor.constraint(equalTo: nameLabel.trailingAnchor, constant: 12),
+            mbtiLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            mbtiLabel.heightAnchor.constraint(equalToConstant: 30),
+            mbtiLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 50)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+    
+    extension UIColor {
+        convenience init(hex: String) {
+            var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+            if hexSanitized.hasPrefix("#") {
+                hexSanitized = String(hexSanitized.dropFirst())
+            }
+            if hexSanitized.count == 6 {
+                let scanner = Scanner(string: hexSanitized)
+                var rgb: UInt64 = 0
+                scanner.scanHexInt64(&rgb)
+                self.init(
+                    red: CGFloat((rgb & 0xFF0000) >> 16) / 255.0,
+                    green: CGFloat((rgb & 0x00FF00) >> 8) / 255.0,
+                    blue: CGFloat(rgb & 0x0000FF) / 255.0,
+                    alpha: 1.0
+                )
+            } else {
+                self.init(white: 0.0, alpha: 1.0)
             }
         }
     }
-}
-
-// UIColor 확장을 작성해서 hex 값을 처리할 수 있도록 합니다.
-extension UIColor {
-    convenience init(hex: String) {
-        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // '#' 제거
-        if hexSanitized.hasPrefix("#") {
-            hexSanitized = String(hexSanitized.dropFirst())
-        }
-
-        // HEX 코드의 길이가 6인지 확인
-        if hexSanitized.count == 6 {
-            let scanner = Scanner(string: hexSanitized)
-            var rgb: UInt64 = 0
-            scanner.scanHexInt64(&rgb)
-
-            self.init(
-                red: CGFloat((rgb & 0xFF0000) >> 16) / 255.0,
-                green: CGFloat((rgb & 0x00FF00) >> 8) / 255.0,
-                blue: CGFloat(rgb & 0x0000FF) / 255.0,
-                alpha: 1.0
-            )
-        } else {
-            self.init(white: 0.0, alpha: 1.0) // 기본값은 검정색
-        }
-    }
-}
