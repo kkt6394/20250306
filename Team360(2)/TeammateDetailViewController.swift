@@ -18,7 +18,6 @@ class TeammateDetailViewController: UIViewController {
 
     
     @IBOutlet weak var nameLabel: UILabel!
-    
     @IBOutlet weak var strengthLabel: UILabel!
     @IBOutlet weak var styleLabel: UILabel!
     @IBOutlet weak var adressLabel: UILabel!
